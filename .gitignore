@@ -1,0 +1,8 @@
+*.ps1
+build/
+ninja/
+resources/
+.clangd
+CMakePresets.json
+imgui.ini
+TODO.md
