@@ -5,9 +5,9 @@ and [ImGui](https://github.com/ocornut/imgui) for dev-tooling.
 ## status
 not finished
 ## to build:
-when using vcpkg: change the `CMAKE_TOOLCHAIN_FILE` definitions in `CMakePresets.json` to your vcpkg path.
-then run:
-```sh
+If you are using vcpkg:
+CMakePresets.json presumes an enviroment variable `VCPKG_ROOT` is defined.
+```cmd
 cmake --preset ninja .
 cmake --build build/ninja --config debug
 #or

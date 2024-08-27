@@ -7,8 +7,6 @@
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_sdlrenderer2.h>
-//#include <glm/vec2.hpp>
-#include <glm/glm.hpp>
 #include <stdint.h>
 #include <chrono>
 #include <memory>

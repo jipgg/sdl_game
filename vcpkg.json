@@ -1,0 +1,15 @@
+{
+  "dependencies": [
+    "sdl2",
+    "sdl2-image",
+    "sdl2-ttf",
+    {
+      "name": "imgui",
+      "features": [
+        "sdl2-binding",
+        "sdl2-renderer-binding"
+      ]
+    },
+    "gsl-lite"
+  ]
+}
