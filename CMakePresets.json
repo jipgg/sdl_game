@@ -1,0 +1,25 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "ninja",
+            "hidden": false,
+            "generator": "Ninja",
+            "binaryDir": "build/ninja",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang-cl",
+                "CMAKE_CXX_COMPILER": "clang-cl",
+                "CMAKE_TOOLCHAIN_FILE": "C:/Users/juape/vcpkg/scripts/buildsystems/vcpkg.cmake"
+            }
+        },
+        {
+            "name": "msvc",
+            "hidden": false,
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "build/msvc",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "C:/Users/juape/vcpkg/scripts/buildsystems/vcpkg.cmake"
+            }
+        }
+    ]
+}

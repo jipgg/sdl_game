@@ -1,8 +1,9 @@
 #include "gui.h"
+#include <algorithm>
 Output_log::Output_log() {
     setup_imgui_style();
 }
-void Output_log::assemble(not_null<SDL_Window*> window) const {
+void Output_log::assemble(SDL_Window* window) const {
     ImGuiStyle old_style = ImGui::GetStyle();
     ImGui::GetStyle() = this->style;
     if (visible) {
@@ -16,7 +17,8 @@ void Output_log::assemble(not_null<SDL_Window*> window) const {
         //ImGui::SetWindowPos(ImVec2{0.f, height - size.y});
         constexpr ImVec4 err_color{.8f, 0.f, 0.f, 1.f};
         constexpr ImVec4 warn_color{.8f, .8f, 0.f, 1.f};
-        std::ranges::for_each(output_elements, [&err_color, &warn_color](const Output_element& e) {
+        std::for_each(std::begin(output_elements), std::end(output_elements),
+                      [&err_color, &warn_color](const Output_element& e){
             switch(e.type) {
                 case Output_type::Error:
                     ImGui::PushStyleColor(ImGuiCol_Text, err_color);

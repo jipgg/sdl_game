@@ -4,14 +4,14 @@ simple 2D game engine made with [SDL](https://www.libsdl.org/)
 and [ImGui](https://github.com/ocornut/imgui) for dev-tooling.
 ## status
 not finished
-## dependencies
-check `CMakeLists.txt`
-## build cmd:
-```ps1
-md build
-cd build
-cmake ..
-#when using vcpkg: cmake -DCMAKE_TOOL_CHAIN_FILE=C:/my/path/to/vcpkg.cmake ..
-cmake --build . --target game --config Debug
+## to build:
+when using vcpkg: change the `CMAKE_TOOLCHAIN_FILE` definitions in `CMakePresets.json` to your vcpkg path.
+then run:
+```sh
+cmake --preset ninja .
+cmake --build build/ninja --config debug
+#or
+cmake --preset msvc .
+cmake --build build/msvc --config debug
 ```
 

@@ -3,6 +3,10 @@
 #include "Game.h"
 
 int SDL_main(int argc, char **argv) {
+    if (AllocConsole()) {
+        FILE fp;
+        
+        }
     std::unique_ptr<Game> game = std::make_unique<Game>();
     return game->run();
 }

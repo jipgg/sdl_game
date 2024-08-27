@@ -51,8 +51,8 @@ public:
         handlers.clear();
     }
     void fire_signal(Params ...args) {
-        std::ranges::for_each(handlers, [&args...](Handler& handler) {
+        for (Handler& handler : handlers) {
             handler(args...);
-        });
+        }
     }
 };

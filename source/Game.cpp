@@ -3,30 +3,28 @@
 #include "utl.h"
 #include "Time_interval.h"
 #include "game_components.h"
-#include "solvers.h"
+#include "collision_logic.h"
 
 void Game::init(SDL_Window* window) {
     int32 w,h;
     SDL_GetWindowSize(window, &w, &h);
     viewport = SDL_Rect{0, 0, w, h};
-    //transformation.translation = Vector2{50, -50};
-    view_transform.viewport = Vector2{
-        static_cast<double>(w),
-        static_cast<double>(h)
+    view_transform.viewport = V2{
+        static_cast<float32>(w),
+        static_cast<float32>(h)
     };
-    view_transform.scaling.y = -1; // sets the origin to the bottom instead of top
     Platform& base = make_child<Platform>();
-    base.size = Vector2{static_cast<double>(w * 4), h / 4.};
-    base.position = Vector2{0, 0};
+    base.size = V2{w * 4.f, h / 4.f};
+    base.position = V2{0, 0};
     auto& platform = make_child<Platform>();
     platform.size = V2{100, 100};
-    platform.position = V2{500, h - h / 4.0 -100};
+    platform.position = V2{500, h - h / 4.f -100};
     auto& another = make_child<Platform>();
     another.size = V2{300, 50};
-    another.position = V2 {100, h/ 4.0};
+    another.position = V2 {100, h/ 4.f};
 
     auto& player = make_child<Player>();
-    player.position.x += 10;
+    player.position = V2{100, 500};
     player.name = "player";
     player.physical_properties.elasticity = .5f;
     /*
@@ -36,74 +34,9 @@ void Game::init(SDL_Window* window) {
         })));
         */
 }
-void Game::update(milliseconds delta) {
-    //collision detection -> need to make this a recursive function for nested child components
-    using u_component = std::unique_ptr<Component>;
-    ranges::for_each(children|views::values, [this,&delta](u_component& e) {
-        auto& obj = static_cast<Game_component&>(*e);
-        Physical_properties& obj_props{obj.physical_properties};
-        int64 delta_ms = delta.count();
-        Vector2 obj_old_pos = obj.position;
-        auto [l, r, t, b] = obj.collision_points();
-        if (obj_props.is_welded) {
-            return; }
-        if (obj.is_falling) {
-            obj.acceleration.y = view_transform.scaling.y * gravity;
-        }
-        obj.velocity += obj.acceleration * delta_ms;
-        obj.position += obj.velocity * delta_ms;
-        ranges::for_each(children | views::values, [this,&obj,&l, &r, &t, &b](u_component& f) {
-            auto& other = static_cast<Game_component&>(*f);
-            const Rect other_rect = other.collision_rect();
-            if(obj.id == other.id) return;
-            Physical_properties& other_props{other.physical_properties};
-            if (utl::is_vector2_in_rect(l, other_rect)) {
-                if (obj.velocity.x < 0) {
-                    obj.is_obstructed = true;
-                    obj.position.x = other.position.x + other.size.x;
-                    if (other_props.is_welded) {
-                        obj.velocity.x = -obj.velocity.x 
-                            * obj.physical_properties.elasticity;
-                    }
-                } else {
-                    obj.is_obstructed = false;
-                }
-            } else if (utl::is_vector2_in_rect(r, other_rect)) {
-                if (obj.velocity.x > 0) {
-                    obj.is_obstructed = true;
-                    obj.position.x = other.position.x - obj.size.x;
-                    if (other_props.is_welded) {
-                        obj.velocity.x = -obj.velocity.x 
-                            * obj.physical_properties.elasticity;
-                    }
-                } else {
-                    obj.is_obstructed = false;
-                }
-            }
-            if (utl::is_vector2_in_rect(t, other_rect)) {
-                obj.is_falling = false;
-                if (obj.velocity.y < 0) {
-                    obj.position.y = other.position.y + other.size.y;
-                    if (other_props.is_welded) {
-                        obj.velocity.y = -obj.velocity.y 
-                            * obj.physical_properties.elasticity;
-                    }
-                }
-            } else if (utl::is_vector2_in_rect(b, other_rect)) {
-                obj.is_falling = false;
-                if (obj.velocity.y > 0) {
-                    obj.position.y = other.position.y - obj.size.y;
-                    if (other.physical_properties.is_welded) {
-                        obj.velocity.y = -obj.velocity.y 
-                            * obj.physical_properties.elasticity;
-                    }
-                }
-            }
-        });
-        if (obj_old_pos != obj.position) {
-            obj.position_changed->fire_signal(obj.position);
-        }
-    });
+void Game::update(std::chrono::milliseconds delta) {
+    auto children_v = children | std::views::values;
+    collision_logic::handle_physical_collisions(children_v, delta, view_transform);
 }
 void Game::render(SDL_Renderer* renderer, const View_transform& transform) const {
     print.assemble(window.get());
@@ -131,16 +64,16 @@ void Game::process_event(SDL_Event& event) {
             break;
         case SDL_MOUSEBUTTONUP: mouse_button_input_ended->fire_signal(event.button); break;
         case SDL_MOUSEWHEEL:
-            view_transform.scaling += Vector2{event.wheel.y * .01, event.wheel.y * .01}; 
+            view_transform.scaling += V2{event.wheel.y * .01f, event.wheel.y * .01f}; 
             mouse_scrolled->fire_signal(event.wheel);
             break;
         case SDL_WINDOWEVENT:
             if (event.window.event == SDL_WINDOWEVENT_RESIZED){
                 int32 new_width = event.window.data1;
                 int32 new_height = event.window.data2;
-                view_transform.viewport = Vector2{
-                    static_cast<double>(new_width),
-                    static_cast<double>(new_height)
+                view_transform.viewport = V2{
+                    static_cast<float>(new_width),
+                    static_cast<float>(new_height)
                 };
                 this->viewport = SDL_Rect{0, 0, new_width, new_height};
                 SDL_RenderSetViewport(renderer.get(), &this->viewport);
@@ -167,7 +100,6 @@ int Game::run () {
     auto last_time = std::chrono::steady_clock::now();
     const std::chrono::milliseconds fixed_delta{16ms};
     Time_interval fixed_update_interval{fixed_delta};
-    auto texture = utl::load_SDL_img_texture(renderer.get(), "resources/jw.png");
     this->init(window.get());
     while (not this->quit) {
         /* events */ {

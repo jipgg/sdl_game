@@ -7,22 +7,22 @@ struct Physical {
 public:
     virtual ~Physical() = default;
     Physical_properties physical_properties;
-    using Pos_changed_event = Event<const Vector2&>;
-    s_ptr<Pos_changed_event> position_changed{
-        make_shared<Event<const Vector2&>>()};
-    Vector2 position;
-    Vector2 velocity;
+    using Pos_changed_event = Event<const V2&>;
+    std::shared_ptr<Pos_changed_event> position_changed{
+        make_shared<Event<const V2&>>()};
+    V2 position;
+    V2 velocity;
     bool is_falling{true};
     bool is_obstructed{false};
-    Vector2 acceleration;
-    Vector2 size;
+    V2 acceleration;
+    V2 size;
     Rect collision_rect() const;
-    std::tuple<Vector2, Vector2, Vector2, Vector2> collision_points() const;
+    std::tuple<V2, V2, V2, V2> collision_points() const;
 };
 // @ Game_component
 class Game_component: public Component<Game>, public Physical {
 public:
-    Game_component(const type_info& _info, Game& _root):
+    Game_component(const std::type_info& _info, Game& _root):
         Component{_info, _root} {}
 };
 // @ Platform
@@ -36,7 +36,7 @@ public:
 class Player: public Game_component {
 public:
     Player(Game& root): Game_component{typeid(Player), root} {
-        size = Vector2{50, 50};
+        size = V2{50, 50};
     }
     void update(std::chrono::milliseconds delta) override;
     void render(SDL_Renderer* renderer, const View_transform& transform) const override;

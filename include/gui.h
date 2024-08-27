@@ -6,7 +6,7 @@ struct SDL_Window;
 class Gui_element {
 public:
     virtual ~Gui_element() = default;
-    virtual void assemble(not_null<SDL_Window*> window) const = 0;
+    virtual void assemble(SDL_Window* window) const = 0;
     bool visible{true};
 };
 enum class Output_type{Output, Error, Warning};
@@ -28,7 +28,7 @@ public:
     }
     template <class ...Args>
     void operator()(Args&&...args) {operator()(Output_type::Output, args...);}
-    virtual void assemble(gsl::not_null<SDL_Window*> window) const override;
+    virtual void assemble(SDL_Window* window) const override;
 private:
     ImGuiStyle style;
     void setup_imgui_style();

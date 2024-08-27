@@ -5,11 +5,11 @@ Rect Physical::collision_rect() const {
     return {.x = position.x, .y = position.y,
         .w = size.x, .h = size.y };
 }
-std::tuple<Vector2, Vector2, Vector2, Vector2> Physical::collision_points() const {
-    Vector2 left = position + Vector2{0, size.y / 2};
-    Vector2 right = position + Vector2{size.x, size.y / 2};
-    Vector2 top = position + Vector2 {size.x / 2, 0};
-    Vector2 bottom = position + Vector2{size.x / 2, size.y};
+std::tuple<V2, V2, V2, V2> Physical::collision_points() const {
+    V2 left = position + V2{0, size.y / 2};
+    V2 right = position + V2{size.x, size.y / 2};
+    V2 top = position + V2 {size.x / 2, 0};
+    V2 bottom = position + V2{size.x / 2, size.y};
     return {left, right, top, bottom};
     }
 // @ Platform

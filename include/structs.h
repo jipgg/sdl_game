@@ -1,28 +1,57 @@
 #pragma once
 #include "common.h"
+template <class T>
 struct Vector2 {
-    double x;
-    double y;
-    Vector2(double _x = 0, double _y = 0);
-    Vector2 operator+(const Vector2& a) const;
-    Vector2& operator+=(const Vector2& a);
-    Vector2 operator-(const Vector2& a) const;
-    Vector2& operator-=(const Vector2& a);
-    Vector2 operator*(const Vector2& a)  const;
-    friend Vector2 operator*(const Vector2& a, double scalar);
-    friend Vector2 operator*(double scalar, const Vector2& a);
-    bool operator==(const Vector2& a) const;
-    Vector2 operator/(double scalar) const;
-    double dot(const Vector2& a) const;
-    Vector2 unit() const;
-    double magnitude() const;
+    T x;
+    T y;
+    Vector2(T _x = 0, T _y = 0): x{_x}, y{_y} {}
+    Vector2 operator+(const Vector2& a) const {
+        return {x + a.x, y + a.y};
+    }
+    Vector2& operator+=(const Vector2& a) {
+        x += a.x;
+        y += a.y;
+        return *this;
+    }
+    Vector2 operator-(const Vector2& a) const {
+        return {x - a.x, y - a.y};
+    }
+    Vector2& operator-=(const Vector2& a) {
+        this->x -= a.x;
+        this->y -= a.y;
+        return *this;
+    }
+    Vector2 operator*(const Vector2& a)  const {
+        return {x * a.x, y * a.y};
+    }
+    friend Vector2 operator*(const Vector2& a, T scalar) {
+        return {a.x * scalar, a.y * scalar};
+    }
+    friend Vector2 operator*(T scalar, const Vector2& a) {
+        return a * scalar;
+    }
+    bool operator==(const Vector2& a) const {
+        return x == a.x and y == a.y;
+    }
+    Vector2 operator/(T scalar) const {
+        return {x / scalar, y / scalar};
+    }
+    T dot(const Vector2& a) const {
+        return x * a.x + y * a.y; 
+    }
+    Vector2 unit() const {
+        return (*this) / magnitude();
+    }
+    T magnitude() const {
+        return static_cast<T>(sqrt(pow(x, 2) + pow(y, 2))); 
+    }
 };
-using V2 = Vector2;
+using V2 = Vector2<float>;
 struct Rect {
-    double x{0};
-    double y{0};
-    double w{0};
-    double h{0};
+    float x{0};
+    float y{0};
+    float w{0};
+    float h{0};
 };
 struct Color {
     uint8 r{0};
@@ -31,8 +60,8 @@ struct Color {
     uint8 a{0};
 };
 struct Circle {
-    Vector2 center;
-    double radius;
+    V2 center;
+    float radius;
 };
 struct Physical_properties {
     bool is_welded{false};
@@ -41,11 +70,11 @@ struct Physical_properties {
     float mass{1};
 };
 struct View_transform {
-    Vector2 translation{0, 0};
-    Vector2 scaling{1, 1};
-    Vector2 viewport{0, 0};
+    V2 translation{0, 0};
+    V2 scaling{1, 1};
+    V2 viewport{0, 0};
     //double rotation{0};
-    Vector2 apply(const Vector2& v) const;
+    V2 apply(const V2& v) const;
     Circle apply(const Circle& c) const;
     Rect apply(const Rect& r) const;
 };

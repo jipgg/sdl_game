@@ -1,5 +1,8 @@
 #pragma once 
 #include <common.h>
+#include <unordered_map>
+#include <ranges>
+#include <vector>
 #include "structs.h"
 template<class Base, class Derived>
 concept Has_base = std::is_base_of_v<Base, Derived>;
@@ -12,10 +15,11 @@ public:
     using Id = uint32_t; // dont go over 4,294,967,295 or scale up (doubt it)
     using Iterator = std::unordered_map<Id, std::unique_ptr<Component>>::iterator;
     using Container = std::unordered_map<Id, std::unique_ptr<Component>>;
+    using View_v = decltype(Container{} | std::views::values);
     std::string name;
     const Id id;
     const size_t type_hash;
-    Component(const type_info& type_info, Root& root):
+    Component(const std::type_info& type_info, Root& root):
         id(id_counter++),
         type_hash(type_info.hash_code()),
         name(type_info.name()),
@@ -40,19 +44,20 @@ public:
     virtual void update(std::chrono::milliseconds delta_ms) {};
     virtual void render(SDL_Renderer* renderer, const View_transform& transform) const {};
     void update_children(std::chrono::milliseconds delta_ms) {
-        for (auto& [id, child] : children) {
+        for (auto& child : children | std::views::values) {
             if (child->parent == nullptr) {
                 orphans.push_back(child->id); }
             child->update(delta_ms);
             if (child->children.size()) {
                 child->update_children(delta_ms); }
-    }
+        }
     //cleanup
-    std::ranges::for_each(orphans, [this](Id& e){
-        auto& child = children[e];
-        child->nuke_lineage();
-        children.erase(e);});
-    orphans.clear();
+        for (Id& e : orphans) {
+            auto& child = children[e];
+            child->nuke_lineage();
+            children.erase(e);
+        }
+        orphans.clear();
     }
     void render_children(SDL_Renderer* renderer, const View_transform& transform) const {
         for (const auto& [id, child] : children) {
