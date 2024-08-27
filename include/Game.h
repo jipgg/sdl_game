@@ -2,19 +2,17 @@
 #include <common.h>
 #include "Component.hpp"
 #include "gui.h"
-#include "utl.h"
 #include "Event.hpp"
 using namespace std::chrono_literals;
 class Game: public Component<Game> {
+    //friend int SDL_main(int argc, char **argv);
 public:
     Game(): Component{ typeid(Game), *this } {}
-    virtual void update(std::chrono::milliseconds delta_ms) override;
-    virtual void render(SDL_Renderer* renderer, const View_transform& transform) const override;
+    virtual void update(const milliseconds& delta_ms) override;
+    virtual void render(not_null<SDL_Renderer*> renderer, const World& world) const override;
     virtual void fixed_update() override;
-    virtual void process_event(SDL_Event& event);
-    virtual void init(SDL_Window* window);
-    int run();
-    void assemble_gui_elements(SDL_Window* window);
+    virtual void init(not_null<SDL_Window*> window);
+    void assemble_gui_elements(not_null<SDL_Window*> window);
     using Key_event = Event<const SDL_KeyboardEvent&>;
     s_ptr<Key_event> key_input_began{make_shared<Key_event>()};
     s_ptr<Key_event> key_input_ended{make_shared<Key_event>()};
@@ -26,14 +24,9 @@ public:
     using Mouse_motion_event = Event<const SDL_MouseMotionEvent&>;
     s_ptr<Mouse_motion_event> mouse_moved{make_shared<Mouse_motion_event>()};
     Output_log print;
-    utl::unique_dtor_ptr<SDL_Window> window{nullptr, nullptr};
-    utl::unique_dtor_ptr<SDL_Renderer> renderer{nullptr, nullptr};
     bool quit{false};
-    double gravity{.01};
     u_ptr<Event<const V2&>::Connection> connection{nullptr};
-    SDL_Rect viewport;
     static constexpr milliseconds fixed_delta{8ms};
 private:
-    View_transform view_transform;
     std::unordered_map<std::string, std::unique_ptr<Gui_element>> gui_elements;
 };

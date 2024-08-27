@@ -30,7 +30,7 @@ class Platform: public Game_component {
 public:
     Platform(Game& root): Game_component{typeid(Platform), root} {
         physical_properties.is_welded = true;}
-    void render(SDL_Renderer* renderer, const View_transform& transform) const override;
+    void render(not_null<SDL_Renderer*> renderer, const World& world) const override;
 };
 // @ Player
 class Player: public Game_component {
@@ -38,8 +38,8 @@ public:
     Player(Game& root): Game_component{typeid(Player), root} {
         size = V2{50, 50};
     }
-    void update(std::chrono::milliseconds delta) override;
-    void render(SDL_Renderer* renderer, const View_transform& transform) const override;
+    void update(const milliseconds& delta) override;
+    void render(not_null<SDL_Renderer*> renderer, const World& world) const override;
     double move_speed{.2};
     double elapsed{0};
     double accelerate_coefficient{.001};

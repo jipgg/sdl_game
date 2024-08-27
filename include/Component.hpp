@@ -41,9 +41,9 @@ public:
         }
     }
     virtual void fixed_update() {};
-    virtual void update(std::chrono::milliseconds delta_ms) {};
-    virtual void render(SDL_Renderer* renderer, const View_transform& transform) const {};
-    void update_children(std::chrono::milliseconds delta_ms) {
+    virtual void update(const milliseconds& delta_ms) {};
+    virtual void render(gsl::not_null<SDL_Renderer*> renderer, const World& world) const {};
+    void update_children(const std::chrono::milliseconds& delta_ms) {
         for (auto& child : children | std::views::values) {
             if (child->parent == nullptr) {
                 orphans.push_back(child->id); }
@@ -59,11 +59,11 @@ public:
         }
         orphans.clear();
     }
-    void render_children(SDL_Renderer* renderer, const View_transform& transform) const {
+    void render_children(gsl::not_null<SDL_Renderer*> renderer, const World& world) const {
         for (const auto& [id, child] : children) {
-            child->render(renderer, transform);
+            child->render(renderer, world);
             if (child->children.size()) {
-                child->render_children(renderer, transform); }
+                child->render_children(renderer, world); }
         }
     }
     void fixed_update_children() {

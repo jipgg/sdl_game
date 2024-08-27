@@ -40,6 +40,7 @@ struct Vector2 {
         return x * a.x + y * a.y; 
     }
     Vector2 unit() const {
+        Expects(magnitude() != 0);
         return (*this) / magnitude();
     }
     T magnitude() const {
@@ -77,4 +78,8 @@ struct View_transform {
     V2 apply(const V2& v) const;
     Circle apply(const Circle& c) const;
     Rect apply(const Rect& r) const;
+};
+struct World {
+    View_transform transform;
+    float gravity;
 };

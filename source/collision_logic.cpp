@@ -1,7 +1,8 @@
 #include "collision_logic.h"
+#include "utl.h"
 
 namespace collision_logic {
-void handle_physical_collisions(game_component_view children_v, const milliseconds& delta, const View_transform& view_transform) {
+void handle_physical_collisions(game_component_view children_v, const milliseconds& delta, const World& world) {
     using u_component= std::unique_ptr<Component<Game>>;
     for (u_component& e : children_v) {
         auto& obj = static_cast<Game_component&>(*e);
@@ -12,8 +13,7 @@ void handle_physical_collisions(game_component_view children_v, const millisecon
         if (obj_props.is_welded) {
             continue; }
         if (obj.is_falling) {
-            //obj.acceleration.y = view_transform.scaling.y * obj.root.gravity;
-            obj.acceleration.y = -obj.root.gravity;
+            obj.acceleration.y = -world.gravity;
         }
         obj.velocity += obj.acceleration * gsl::narrow_cast<float>(delta_ms);
         obj.position += obj.velocity * gsl::narrow_cast<float>(delta_ms);

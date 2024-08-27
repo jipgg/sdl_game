@@ -13,13 +13,13 @@ std::tuple<V2, V2, V2, V2> Physical::collision_points() const {
     return {left, right, top, bottom};
     }
 // @ Platform
-void Platform::render(SDL_Renderer* renderer, const View_transform& transform) const {
+void Platform::render(not_null<SDL_Renderer*> renderer, const World& world) const {
     utl::set_color(renderer, Color{100, 150, 100, 0});
-    SDL_Rect r = utl::from_Rect(transform.apply(this->collision_rect()));
+    SDL_Rect r = utl::from_Rect(world.transform.apply(this->collision_rect()));
     SDL_RenderFillRect(renderer, &r);
 }
 // @ Player
-void Player::update(std::chrono::milliseconds delta) {
+void Player::update(const milliseconds& delta) {
     const uint8_t* key_states = SDL_GetKeyboardState(nullptr);
     int direction{0};
     if (key_states[SDL_SCANCODE_D]) {
@@ -45,9 +45,8 @@ void Player::update(std::chrono::milliseconds delta) {
     elapsed = std::clamp(elapsed, 0.0, 1.0);
     velocity.x = direction * elapsed * move_speed * delta.count();
 }
-void Player::render(SDL_Renderer* renderer, const View_transform& transform) const {
+void Player::render(not_null<SDL_Renderer*> renderer, const World& world) const {
     utl::set_color(renderer, Color{0xff, 0xff, 0xaa, 0xff});
-    //draw::fill_circle(renderer, utl::from_vector2(world.apply(position)), size.x);
-    SDL_Rect r = utl::from_Rect(transform.apply(this->collision_rect()));
+    SDL_Rect r = utl::from_Rect(world.transform.apply(collision_rect()));
     SDL_RenderFillRect(renderer, &r);
 }
