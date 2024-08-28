@@ -1,6 +1,6 @@
 #pragma once
 #include <common.h>
-#include "structs.h"
+#include "structs.hpp"
 #include <unordered_map>
 #include <ranges>
 SDL_Rect operator*(const SDL_Rect& rect, float scalar);
@@ -18,7 +18,7 @@ SDL_Point from_V2(const V2& v);
 template<class T>
 using  unique_dtor_ptr = std::unique_ptr<T, void(*)(T*)>;
 unique_dtor_ptr<SDL_Window> make_SDL_window(gsl::czstring title, SDL_Rect rect, Uint32 flags);
-unique_dtor_ptr<SDL_Renderer> make_SDL_renderer(SDL_Window* window, int index, uint32 flags);
+unique_dtor_ptr<SDL_Renderer> make_SDL_renderer(SDL_Window* window, int index, Uint32 flags);
 unique_dtor_ptr<TTF_Font> make_SDL_font(gsl::czstring filename, int ptsize);
 unique_dtor_ptr<SDL_Surface> make_SDL_surface_text_solid(TTF_Font* font, gsl::czstring text, SDL_Color fg);
 unique_dtor_ptr<SDL_Texture> make_SDL_texture_from_surface(SDL_Renderer* renderer, SDL_Surface* surface);
@@ -33,8 +33,8 @@ using SDL_Texture_owner = unique_dtor_ptr<SDL_Texture>;
 //util
 struct Texture_bundle {
     unique_dtor_ptr<SDL_Texture> texture;
-    int32 w;
-    int32 h;
+    int w;
+    int h;
 };
 using char_texture_cache = std::unordered_map<char, Texture_bundle>;
 std::unordered_map<char, Texture_bundle> create_char_texture_cache(

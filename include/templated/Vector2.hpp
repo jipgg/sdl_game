@@ -1,5 +1,5 @@
 #pragma once
-#include "common.h"
+namespace templated {
 template <class T>
 struct Vector2 {
     T x;
@@ -47,40 +47,4 @@ struct Vector2 {
         return static_cast<T>(sqrt(pow(x, 2) + pow(y, 2))); 
     }
 };
-using V2 = Vector2<float>;
-struct Rect {
-    float x{0};
-    float y{0};
-    float w{0};
-    float h{0};
-};
-struct Color {
-    uint8 r{0};
-    uint8 g{0};
-    uint8 b{0};
-    uint8 a{0};
-};
-struct Circle {
-    V2 center;
-    float radius;
-};
-struct Physical_properties {
-    bool welded{false};
-    bool collidable{true};
-    float elasticity{0};
-    float mass{1};
-    float friction{.3f};
-};
-struct View_transform {
-    V2 translation{0, 0};
-    V2 scaling{1, 1};
-    V2 viewport{0, 0};
-    //double rotation{0};
-    V2 apply(const V2& v) const;
-    Circle apply(const Circle& c) const;
-    Rect apply(const Rect& r) const;
-};
-struct World {
-    View_transform transform;
-    float gravity;
-};
+}

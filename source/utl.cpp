@@ -45,15 +45,15 @@ void set_color(SDL_Renderer* renderer, Color color) {
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 }
 SDL_Point from_V2(const V2& v) {
-    return {static_cast<int32>(v.x), static_cast<int32>(v.y)};
+    return {static_cast<int>(v.x), static_cast<int>(v.y)};
 }
-unique_dtor_ptr<SDL_Window> make_SDL_window(gsl::czstring title, SDL_Rect rect, uint32 flags) {
+unique_dtor_ptr<SDL_Window> make_SDL_window(gsl::czstring title, SDL_Rect rect, uint32_t flags) {
     SDL_Window* window = SDL_CreateWindow(title, rect.x, rect.y, rect.w, rect.h, flags);
     if (not window) {
         prerrln(SDL_GetError()); }
     return unique_dtor_ptr<SDL_Window>{window, SDL_DestroyWindow};
 }
-unique_dtor_ptr<SDL_Renderer> make_SDL_renderer(SDL_Window* window, int index, uint32 flags) {
+unique_dtor_ptr<SDL_Renderer> make_SDL_renderer(SDL_Window* window, int index, uint32_t flags) {
     SDL_Renderer* renderer = SDL_CreateRenderer(window, index, flags);
     if (not renderer) {
         prerrln(SDL_GetError()); }

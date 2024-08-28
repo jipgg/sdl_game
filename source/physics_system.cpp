@@ -1,53 +1,53 @@
-#include "collision_logic.h"
+#include "physics_system.h"
 #include "utl.h"
 #include "solvers.h"
+#include "entity_derivations.h"
+#include "print.hpp"
+using u_Entity = std::unique_ptr<Entity>; 
 
-namespace collision_logic {
+namespace physics {
 // # pretty scuffed implementation atm, fix it
-void handle_physical_collisions(game_component_view children_v, const milliseconds& delta, const World& world) {
-    using u_component= std::unique_ptr<Component<Game>>;
-    for (u_component& e : children_v) {
-        auto& obj = static_cast<Game_component&>(*e);
-        Physical_properties& obj_props{obj.physical_properties};
-        int64 delta_ms = delta.count();
+void handle_physical_collisions(std::list<u_Entity>& entities, const milliseconds& delta, float gravity) {
+    auto physicals = std::views::filter([](u_Entity& e){ return e->is_physical;});
+    for (u_Entity& e : entities|physicals) {
+        Physical_entity& obj = static_cast<Physical_entity&>(*e);
         V2 obj_old_pos = obj.position;
         auto [left, right, top, bottom] = obj.collision_points();
-        if (obj_props.welded) {
+        //println(obj.is_falling, obj.name, obj.velocity.y);
+        if (obj.welded) {
             continue;
         }
         if (obj.is_falling) {
             obj.acceleration.x = 0;
-            obj.acceleration.y = -world.gravity;
+            obj.acceleration.y = -gravity;
         } else {
             if (fabs(obj.velocity.x) > 0.1f) {
-                const int8 dir = obj.velocity.x > 0.f ? -1 : 1;
+                const int dir = obj.velocity.x > 0.f ? -1 : 1;
                 // # should probably change the is_falling to a pointer
                 // on which the current obj is standing on to get the
                 // effective friction coefficient here
-                obj.acceleration.x = dir * obj_props.friction * world.gravity;
+                obj.acceleration.x = dir * obj.friction * gravity;
             } else {
                 obj.acceleration.x = 0;
                 obj.velocity.x = 0;
             }
         }
-        obj.velocity += obj.acceleration * narrow_cast<float32>(delta_ms);
-        obj.position += obj.velocity * narrow_cast<float32>(delta_ms);
-        for (u_component& f : children_v) {
-            auto& other = static_cast<Game_component&>(*f);
+        obj.velocity += obj.acceleration * gsl::narrow_cast<float>(delta.count());
+        obj.position += obj.velocity * gsl::narrow_cast<float>(delta.count());
+        for (u_Entity& f : entities|physicals) {
+            auto& other = static_cast<Physical_entity&>(*f);
             const Rect other_rect = other.collision_rect();
             if(obj.id == other.id) continue;
-            Physical_properties& other_props{other.physical_properties};
             if (utl::is_V2_in_Rect(left, other_rect)) {
                 if (obj.velocity.x < 0) {
                     obj.is_obstructed = true;
                     obj.position.x = other.position.x + other.size.x;
-                    if (other_props.welded) {
+                    if (other.welded) {
                         obj.velocity.x = -obj.velocity.x 
-                            * obj.physical_properties.elasticity;
+                            * obj.elasticity;
                     } else {
-                        auto [obj_vel, other_vel] = solvers::velocities_after_collision(obj_props,
-                                                            obj.velocity,
-                                                            other_props,
+                        auto [obj_vel, other_vel] = solvers::velocities_after_collision(obj.elasticity, obj.mass, obj.velocity,
+                                                            other.elasticity, other.mass,
                                                             other.velocity);
                         obj.velocity.x = obj_vel.x;
                         other.velocity.x = other_vel.x;
@@ -59,13 +59,12 @@ void handle_physical_collisions(game_component_view children_v, const millisecon
                 if (obj.velocity.x > 0) {
                     obj.is_obstructed = true;
                     obj.position.x = other.position.x - obj.size.x;
-                    if (other_props.welded) {
+                    if (other.welded) {
                         obj.velocity.x = -obj.velocity.x 
-                            * obj.physical_properties.elasticity;
+                            * obj.elasticity;
                     } else {
-                        auto [obj_vel, other_vel] = solvers::velocities_after_collision(obj_props,
-                                                            obj.velocity,
-                                                            other_props,
+                        auto [obj_vel, other_vel] = solvers::velocities_after_collision(obj.elasticity, obj.mass, obj.velocity,
+                                                            other.elasticity, other.mass,
                                                             other.velocity);
                         obj.velocity.x = obj_vel.x;
                         other.velocity.x = other_vel.x;
@@ -78,13 +77,13 @@ void handle_physical_collisions(game_component_view children_v, const millisecon
                 obj.is_falling = false;
                 if (obj.velocity.y < 0) {
                     obj.position.y = other.position.y + other.size.y;
-                    if (other_props.welded) {
+                    if (other.welded) {
                         obj.velocity.y = -obj.velocity.y 
-                            * obj.physical_properties.elasticity;
+                            * obj.elasticity;
                     } else {
-                        auto [obj_vel, other_vel] = solvers::velocities_after_collision(obj_props,
+                        auto [obj_vel, other_vel] = solvers::velocities_after_collision(obj.elasticity, obj.mass,
                                                             obj.velocity,
-                                                            other_props,
+                                                            other.elasticity, other.mass,
                                                             other.velocity);
                         obj.velocity.y = obj_vel.y;
                         other.velocity.y = other_vel.y;
@@ -94,13 +93,13 @@ void handle_physical_collisions(game_component_view children_v, const millisecon
                 obj.is_falling = false;
                 if (obj.velocity.y > 0) {
                     obj.position.y = other.position.y - obj.size.y;
-                    if (other.physical_properties.welded) {
+                    if (other.welded) {
                         obj.velocity.y = -obj.velocity.y 
-                            * obj.physical_properties.elasticity;
+                            * obj.elasticity;
                     } else {
-                        auto [obj_vel, other_vel] = solvers::velocities_after_collision(obj_props,
+                        auto [obj_vel, other_vel] = solvers::velocities_after_collision(obj.elasticity, obj.mass,
                                                             obj.velocity,
-                                                            other_props,
+                                                            other.elasticity, other.mass,
                                                             other.velocity);
                         obj.velocity.y = obj_vel.y;
                         other.velocity.y = other_vel.y;
