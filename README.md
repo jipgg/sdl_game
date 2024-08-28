@@ -6,6 +6,8 @@ and [ImGui](https://github.com/ocornut/imgui) for dev-tooling.
 not finished
 ## to build:
 If you are using vcpkg:
+to automatically install all necessary dependencies;
+rename `.vcpkg.json` to `vcpkg.json`.
 CMakePresets.json presumes an enviroment variable `VCPKG_ROOT` is defined.
 ```cmd
 cmake --preset ninja .

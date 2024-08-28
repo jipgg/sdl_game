@@ -42,3 +42,5 @@ using int64 = int64_t;
 using float32 = float;
 using float64 = double;
 using gsl::not_null;
+using gsl::czstring;
+using gsl::narrow_cast;

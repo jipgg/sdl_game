@@ -24,6 +24,7 @@ public:
     using Mouse_motion_event = Event<const SDL_MouseMotionEvent&>;
     s_ptr<Mouse_motion_event> mouse_moved{make_shared<Mouse_motion_event>()};
     Output_log print;
+    u_ptr<Explorer> explorer;
     bool quit{false};
     u_ptr<Event<const V2&>::Connection> connection{nullptr};
     static constexpr milliseconds fixed_delta{8ms};

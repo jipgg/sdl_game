@@ -65,10 +65,11 @@ struct Circle {
     float radius;
 };
 struct Physical_properties {
-    bool is_welded{false};
-    bool is_collidable{true};
+    bool welded{false};
+    bool collidable{true};
     float elasticity{0};
     float mass{1};
+    float friction{.3f};
 };
 struct View_transform {
     V2 translation{0, 0};

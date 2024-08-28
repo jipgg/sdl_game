@@ -2,6 +2,9 @@
 #include <common.h>
 #include <sstream>
 #include <list>
+template <class T>
+class Component;
+class Game;
 struct SDL_Window;
 class Gui_element {
 public:
@@ -33,4 +36,11 @@ private:
     ImGuiStyle style;
     void setup_imgui_style();
     std::list<Output_element> output_elements;
+};
+class Explorer : public Gui_element {
+public:
+    Explorer(not_null<Component<Game>*> _root): root{_root}{}
+    virtual void assemble(SDL_Window* window) const override;
+private:
+    not_null<Component<Game>*> root;
 };

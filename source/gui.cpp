@@ -1,5 +1,6 @@
 #include "gui.h"
 #include <algorithm>
+#include "game_components.h"
 Output_log::Output_log() {
     setup_imgui_style();
 }
@@ -87,4 +88,18 @@ void Output_log::setup_imgui_style() {
     style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.40f, 0.39f, 0.38f, 0.63f);
     style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.25f, 1.00f, 0.00f, 1.00f);
     style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.25f, 1.00f, 0.00f, 0.43f);
+}
+void deep_tree_display(not_null<Component<Game>*> parent) {
+	ImGui::PushID(parent);
+	if (ImGui::TreeNodeEx(parent->name.c_str(), ImGuiTreeNodeFlags_SpanFullWidth)) {
+		for (auto& [id, child] : parent->children)
+			deep_tree_display(child.get());
+	    ImGui::TreePop();
+	}
+	ImGui::PopID();
+}
+void Explorer::assemble(SDL_Window* window) const {
+    if (ImGui::Begin("explorer", nullptr))
+        deep_tree_display(root);
+    ImGui::End();
 }

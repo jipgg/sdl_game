@@ -13,8 +13,8 @@ std::tuple<V2, V2, V2, V2> Physical::collision_points() const {
     return {left, right, top, bottom};
     }
 // @ Platform
-void Platform::render(not_null<SDL_Renderer*> renderer, const World& world) const {
-    utl::set_color(renderer, Color{100, 150, 100, 0});
+void Block::render(not_null<SDL_Renderer*> renderer, const World& world) const {
+    utl::set_color(renderer, color);
     SDL_Rect r = utl::from_Rect(world.transform.apply(this->collision_rect()));
     SDL_RenderFillRect(renderer, &r);
 }
@@ -32,6 +32,7 @@ void Player::update(const milliseconds& delta) {
         }
     };
     if (is_falling) { return;}
+    /*
     if (direction) {
         if (not is_obstructed) {
             elapsed += accelerate_coefficient * delta.count();
@@ -44,6 +45,10 @@ void Player::update(const milliseconds& delta) {
     } 
     elapsed = std::clamp(elapsed, 0.0, 1.0);
     velocity.x = direction * elapsed * move_speed * delta.count();
+*/
+    if (direction) {
+        velocity.x = direction * move_speed * delta.count();
+    }
 }
 void Player::render(not_null<SDL_Renderer*> renderer, const World& world) const {
     utl::set_color(renderer, Color{0xff, 0xff, 0xaa, 0xff});

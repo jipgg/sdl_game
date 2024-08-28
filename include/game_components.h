@@ -26,10 +26,10 @@ public:
         Component{_info, _root} {}
 };
 // @ Platform
-class Platform: public Game_component {
+class Block: public Game_component {
 public:
-    Platform(Game& root): Game_component{typeid(Platform), root} {
-        physical_properties.is_welded = true;}
+    Color color{180, 180, 180, 180};
+    Block(Game& root): Game_component{typeid(Block), root} {}
     void render(not_null<SDL_Renderer*> renderer, const World& world) const override;
 };
 // @ Player
@@ -40,11 +40,11 @@ public:
     }
     void update(const milliseconds& delta) override;
     void render(not_null<SDL_Renderer*> renderer, const World& world) const override;
-    double move_speed{.2};
+    double move_speed{.15};
+    double jump_power{2.5};
     double elapsed{0};
     double accelerate_coefficient{.001};
     double decelerate_coefficient{.001};
-    double jump_power{3};
 };
 // @ Variable
 template <class T>

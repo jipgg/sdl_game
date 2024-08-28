@@ -10,6 +10,7 @@
         "sdl2-renderer-binding"
       ]
     },
-    "gsl-lite"
+    "gsl-lite",
+    "tinyxml2"
   ]
 }
