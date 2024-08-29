@@ -3,8 +3,17 @@
 #include "solvers.h"
 #include "entity_derivations.h"
 using u_Entity = std::unique_ptr<Entity>; 
+constexpr float BIG_MASS{1e25};
 
 namespace physics {
+float effective_elasticity(float e1, float e2) {
+    return (e1 + e2) / 2.0;
+}
+std::tuple<V2, V2> velocities_after_collision(
+    float e, float m1, const V2& u1, float m2, const V2& u2) {
+    return {V2{(m1 * u1 + m2 * u2 - m2 * e * (u1 - u2)) / (m1 + m2)},
+        V2{(m1 * u1 + m2 * u2 + m1 * e * (u1 - u2)) / (m1 + m2)}};
+}
 // # pretty scuffed implementation atm, fix it
 void handle_physical_collisions(std::list<u_Entity>& entities, const milliseconds& delta) {
     auto physical_filter = std::views::filter([](u_Entity& e){ return e->is_physical;});
@@ -41,14 +50,11 @@ void handle_physical_collisions(std::list<u_Entity>& entities, const millisecond
                 if (obj.velocity.x < 0) {
                     obj.is_obstructed = true;
                     obj.position.x = other.position.x + other.size.x;
-                    if (other.welded) {
-                        obj.velocity.x = -obj.velocity.x 
-                            * obj.elasticity;
-                    } else {
-                        auto [obj_vel, other_vel] = solvers::velocities_after_collision(obj.elasticity, obj.mass, obj.velocity,
-                                                            other.elasticity, other.mass,
-                                                            other.velocity);
-                        obj.velocity.x = obj_vel.x;
+                    const float other_real_mass = other.welded? BIG_MASS : other.mass;
+                    const float e = effective_elasticity(obj.elasticity, other.elasticity);
+                    auto [obj_vel, other_vel] = velocities_after_collision(e, obj.mass, obj.velocity, other_real_mass, V2{0, 0});
+                    obj.velocity.x = obj_vel.x;
+                    if (not other.welded) {
                         other.velocity.x = other_vel.x;
                     }
                 } else {
@@ -58,14 +64,11 @@ void handle_physical_collisions(std::list<u_Entity>& entities, const millisecond
                 if (obj.velocity.x > 0) {
                     obj.is_obstructed = true;
                     obj.position.x = other.position.x - obj.size.x;
-                    if (other.welded) {
-                        obj.velocity.x = -obj.velocity.x 
-                            * obj.elasticity;
-                    } else {
-                        auto [obj_vel, other_vel] = solvers::velocities_after_collision(obj.elasticity, obj.mass, obj.velocity,
-                                                            other.elasticity, other.mass,
-                                                            other.velocity);
-                        obj.velocity.x = obj_vel.x;
+                    const float other_real_mass = other.welded? BIG_MASS : other.mass;
+                    const float e = effective_elasticity(obj.elasticity, other.elasticity);
+                    auto [obj_vel, other_vel] = velocities_after_collision(e, obj.mass, obj.velocity, other_real_mass, V2{0, 0});
+                    obj.velocity.x = obj_vel.x;
+                    if (not other.welded) {
                         other.velocity.x = other_vel.x;
                     }
                 } else {
@@ -76,15 +79,11 @@ void handle_physical_collisions(std::list<u_Entity>& entities, const millisecond
                 obj.is_falling = false;
                 if (obj.velocity.y < 0) {
                     obj.position.y = other.position.y + other.size.y;
-                    if (other.welded) {
-                        obj.velocity.y = -obj.velocity.y 
-                            * obj.elasticity;
-                    } else {
-                        auto [obj_vel, other_vel] = solvers::velocities_after_collision(obj.elasticity, obj.mass,
-                                                            obj.velocity,
-                                                            other.elasticity, other.mass,
-                                                            other.velocity);
-                        obj.velocity.y = obj_vel.y;
+                    const float other_real_mass = other.welded? BIG_MASS : other.mass;
+                    const float e = effective_elasticity(obj.elasticity, other.elasticity);
+                    auto [obj_vel, other_vel] = velocities_after_collision(e, obj.mass, obj.velocity, other_real_mass, V2{0, 0});
+                    obj.velocity.y = obj_vel.y;
+                    if (not other.welded) {
                         other.velocity.y = other_vel.y;
                     }
                 }
@@ -92,15 +91,11 @@ void handle_physical_collisions(std::list<u_Entity>& entities, const millisecond
                 obj.is_falling = false;
                 if (obj.velocity.y > 0) {
                     obj.position.y = other.position.y - obj.size.y;
-                    if (other.welded) {
-                        obj.velocity.y = -obj.velocity.y 
-                            * obj.elasticity;
-                    } else {
-                        auto [obj_vel, other_vel] = solvers::velocities_after_collision(obj.elasticity, obj.mass,
-                                                            obj.velocity,
-                                                            other.elasticity, other.mass,
-                                                            other.velocity);
-                        obj.velocity.y = obj_vel.y;
+                    const float other_real_mass = other.welded? BIG_MASS : other.mass;
+                    const float e = effective_elasticity(obj.elasticity, other.elasticity);
+                    auto [obj_vel, other_vel] = velocities_after_collision(e, obj.mass, obj.velocity, other_real_mass, V2{0, 0});
+                    obj.velocity.y = obj_vel.y;
+                    if (not other.welded) {
                         other.velocity.y = other_vel.y;
                     }
                 }
