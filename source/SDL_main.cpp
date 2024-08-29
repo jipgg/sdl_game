@@ -10,8 +10,6 @@
 #include "entity_derivations.h"
 #include "dev_tools.h"
 #include <functional>
-constexpr float GRAVITY{.01f};
-using dev_tools::output;
 
 int SDL_main(int argc, char **argv) {
     SDL_Init(SDL_INIT_VIDEO);
@@ -105,7 +103,7 @@ int SDL_main(int argc, char **argv) {
             //duration<double> delta_sec = curr_time - last_time;
             const milliseconds delta = duration_cast<milliseconds>(curr_time - last_time);
             last_time = curr_time;
-            physics::handle_physical_collisions(state.entities, delta, GRAVITY);
+            physics::handle_physical_collisions(state.entities, delta);
             game::update(delta, &state);
             for(auto& entity : state.entities){
                 update_entity_tree(entity, delta);}

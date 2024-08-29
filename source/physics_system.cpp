@@ -2,12 +2,11 @@
 #include "utl.h"
 #include "solvers.h"
 #include "entity_derivations.h"
-#include "print.hpp"
 using u_Entity = std::unique_ptr<Entity>; 
 
 namespace physics {
 // # pretty scuffed implementation atm, fix it
-void handle_physical_collisions(std::list<u_Entity>& entities, const milliseconds& delta, float gravity) {
+void handle_physical_collisions(std::list<u_Entity>& entities, const milliseconds& delta) {
     auto physicals = std::views::filter([](u_Entity& e){ return e->is_physical;});
     for (u_Entity& e : entities|physicals) {
         Physical_entity& obj = static_cast<Physical_entity&>(*e);
@@ -19,14 +18,14 @@ void handle_physical_collisions(std::list<u_Entity>& entities, const millisecond
         }
         if (obj.is_falling) {
             obj.acceleration.x = 0;
-            obj.acceleration.y = -gravity;
+            obj.acceleration.y = -GRAVITY;
         } else {
             if (fabs(obj.velocity.x) > 0.1f) {
                 const int dir = obj.velocity.x > 0.f ? -1 : 1;
                 // # should probably change the is_falling to a pointer
                 // on which the current obj is standing on to get the
                 // effective friction coefficient here
-                obj.acceleration.x = dir * obj.friction * gravity;
+                obj.acceleration.x = dir * obj.friction * GRAVITY;
             } else {
                 obj.acceleration.x = 0;
                 obj.velocity.x = 0;
