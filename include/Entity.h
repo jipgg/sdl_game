@@ -13,7 +13,7 @@ public:
     const uint32_t id;
     std::string name{"entity"};
     virtual ~Entity() = default;
-    void add(std::unique_ptr<Entity> component);
+    Id add(std::unique_ptr<Entity> component);
     void remove(Id  id);
     template <Entity_esque T>
     T& use(Id id) {
@@ -22,8 +22,8 @@ public:
     const bool is_physical{false};
     virtual void update(const milliseconds& delta) {};
     virtual void render(not_null<SDL_Renderer*> renderer, const View_transform& transform) const {}
-private:
-    Entity* owner;
-    inline static uint32_t curr_id_gift{0}; 
     std::unordered_map<Id, unique_ptr<Entity>> components;
+private:
+    Entity* owner{nullptr};
+    inline static uint32_t curr_id_gift{0}; 
 };

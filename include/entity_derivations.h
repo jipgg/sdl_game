@@ -38,4 +38,5 @@ public:
 struct Game_state {
     View_transform transform;
     std::list<unique_ptr<Entity>> entities;
+    bool quit{false};
 };

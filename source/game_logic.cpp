@@ -16,6 +16,12 @@ void init(V2i window_size, gsl::not_null<Game_state *> game_state) {
     player->name = "player";
     player->friction = .5f;
     player->welded = false;
+    Entity::Id id = player->add(std::make_unique<Block>());
+    player->use<Block>(id).size = V2{100, 100};
+    player->use<Block>(id).position = V2{100, 100};
+    player->use<Block>(id).welded = true;
+    player->use<Block>(id).color = Color{255, 0, 0, 255};
+
     game_state->entities.push_back(std::move(player));
 }
 void update(const milliseconds& delta, gsl::not_null<Game_state*> game_state) {
