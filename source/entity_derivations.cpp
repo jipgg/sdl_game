@@ -1,5 +1,6 @@
 #include "entity_derivations.h"
 #include "utl.h"
+#include "dev_tools.h"
 
 Rect Physical_entity::collision_rect() const {
     return {.x = position.x, .y = position.y,
@@ -27,10 +28,11 @@ void Player::update(const milliseconds& delta) {
     if (key_states[SDL_SCANCODE_A]) {--direction;}
     if (key_states[SDL_SCANCODE_SPACE]) {
         if (not is_falling) {
-            is_falling = true;
+            //is_falling = true;
             velocity.y = jump_power;
         }
     };
+    //dev_tools::output(is_falling, "is_falling");
     if (is_falling) { return;}
     if (direction) {
         velocity.x = direction * move_speed * delta.count();

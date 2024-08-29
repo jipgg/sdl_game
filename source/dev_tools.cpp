@@ -18,7 +18,7 @@ void assemble_imgui_windows(entity_view entities) {
         ImGui::End();
     }
     if (visibility_toggles::explorer) {
-        if (ImGui::Begin("explorer", &visibility_toggles::explorer)) {
+        if (ImGui::Begin("entity list", &visibility_toggles::explorer)) {
             for (auto& entity : entities) {
                 deep_tree_display(entity.get());
             }

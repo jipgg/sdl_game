@@ -4,10 +4,9 @@
 #include <windows.h>
 #endif
 #include "common.h"
-#include "game_logic.h"
+#include "game.h"
 #include "physics_system.h"
 #include "utl.h"
-#include "entity_derivations.h"
 #include "dev_tools.h"
 #include <functional>
 
@@ -37,7 +36,7 @@ int SDL_main(int argc, char **argv) {
     state.transform = View_transform{.translation{0, 0}, .scaling{1, 1} };
     SDL_GetWindowSize(window.get(), &state.transform.viewport.x,
                       &state.transform.viewport.y);
-    game::init(state.transform.viewport, &state);
+    game::init(state.transform.viewport, state);
     namespace rv = std::ranges::views;
     using entity_ptr = std::unique_ptr<Entity>;
     // # should probably just make these global functions
@@ -95,7 +94,7 @@ int SDL_main(int argc, char **argv) {
             const milliseconds delta = duration_cast<milliseconds>(curr_time - last_time);
             last_time = curr_time;
             physics::handle_physical_collisions(state.entities, delta);
-            game::update(delta, &state);
+            game::update(delta, state);
             for(auto& entity : state.entities){
                 update_entity_tree(entity, delta);}
         } /* render loop */ {

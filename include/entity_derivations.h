@@ -35,8 +35,3 @@ public:
     void update(const milliseconds& delta) override;
     void render(not_null<SDL_Renderer*> renderer, const View_transform& transform) const override;
 };
-struct Game_state {
-    View_transform transform;
-    std::list<unique_ptr<Entity>> entities;
-    bool quit{false};
-};

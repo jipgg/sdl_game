@@ -1,6 +1,7 @@
 #include "physics_system.h"
 #include "utl.h"
 #include "solvers.h"
+#include "dev_tools.h"
 #include "entity_derivations.h"
 using u_Entity = std::unique_ptr<Entity>; 
 constexpr float BIG_MASS{1e25};
@@ -44,8 +45,8 @@ void handle_physical_collisions(std::list<u_Entity>& entities, const millisecond
         obj.position += obj.velocity * gsl::narrow_cast<float>(delta.count());
         for (u_Entity& f : entities | physical_filter) {
             auto& other = static_cast<Physical_entity&>(*f);
-            const Rect other_rect = other.collision_rect();
             if(obj.id == other.id) continue;
+            const Rect other_rect = other.collision_rect();
             if (utl::is_V2_in_Rect(left, other_rect)) {
                 if (obj.velocity.x < 0) {
                     obj.is_obstructed = true;
@@ -86,9 +87,12 @@ void handle_physical_collisions(std::list<u_Entity>& entities, const millisecond
                     if (not other.welded) {
                         other.velocity.y = other_vel.y;
                     }
+                } else {
+                    obj.is_falling = true;
                 }
-            } else if (utl::is_V2_in_Rect(bottom, other_rect)) {
-                obj.is_falling = false;
+            }
+            if (utl::is_V2_in_Rect(bottom, other_rect)) {
+                //obj.is_falling = false;
                 if (obj.velocity.y > 0) {
                     obj.position.y = other.position.y - obj.size.y;
                     const float other_real_mass = other.welded? BIG_MASS : other.mass;
@@ -99,7 +103,7 @@ void handle_physical_collisions(std::list<u_Entity>& entities, const millisecond
                         other.velocity.y = other_vel.y;
                     }
                 }
-            }
+            } 
         }
     }
 }

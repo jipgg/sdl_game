@@ -18,7 +18,7 @@ inline std::string output_log{};
 template <class ...Params>
 void output(Params&&...args) {
     std::stringstream stream;
-    ((stream << args), ...) << "\n";
-    output_log += stream.str();
+    ((stream << args << " "), ...) << "\n";
+    output_log = stream.str() + output_log;
 }
 }
