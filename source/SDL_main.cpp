@@ -30,23 +30,17 @@ int SDL_main(int argc, char **argv) {
     }
     #endif
     ImGuiContext* context = ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    ImGui::StyleColorsDark();
     ImGui::GetStyle() = dev_tools::create_default_style();
     ImGui_ImplSDL2_InitForSDLRenderer(window.get(), renderer.get());
     ImGui_ImplSDLRenderer2_Init(renderer.get());
-    Game_state state{}; {//scoped to not have the old window size laying around
-        int window_width, window_height;
-        SDL_GetWindowSize(window.get(), &window_width, &window_height);
-        state.transform = View_transform{
-            .translation {0, 0},
-            .scaling = V2{1, 1},
-            .viewport{static_cast<float>(window_width), static_cast<float>(window_height)},
-        };
-        game::init(V2i{window_width, window_height}, &state);
-    }
+    Game_state state{};
+    state.transform = View_transform{.translation{0, 0}, .scaling{1, 1} };
+    SDL_GetWindowSize(window.get(), &state.transform.viewport.x,
+                      &state.transform.viewport.y);
+    game::init(state.transform.viewport, &state);
     namespace rv = std::ranges::views;
     using entity_ptr = std::unique_ptr<Entity>;
+    // # should probably just make these global functions
     std::function<void(entity_ptr&)> render_entity_tree =
     [&render_entity_tree, &state, &renderer](entity_ptr& entity){
         entity->render(renderer.get(), state.transform);
@@ -63,9 +57,9 @@ int SDL_main(int argc, char **argv) {
             }
     };
     auto last_time = steady_clock::now();
+    SDL_Event e;
     while (not state.quit) {
-        /* events */ {
-            SDL_Event e;
+        /* event loop */ {
             while (SDL_PollEvent(&e)) {
                 ImGui_ImplSDL2_ProcessEvent(&e);
                 switch (e.type) {
@@ -90,35 +84,34 @@ int SDL_main(int argc, char **argv) {
                         if (e.window.event == SDL_WINDOWEVENT_RESIZED){
                             int new_width = e.window.data1;
                             int new_height = e.window.data2;
-                            state.transform.viewport = V2 {float(new_width), float(new_height)};
+                            state.transform.viewport = V2i{new_width, new_height};
                         }
                         break;
                 }
             }
-        } /* update */ {
-            ImGui_ImplSDLRenderer2_NewFrame();
-            ImGui_ImplSDL2_NewFrame();
-            ImGui::NewFrame();
+        } /* update loop */ {
+            // # maybe put delta inside game_state
             auto curr_time = steady_clock::now();
-            //duration<double> delta_sec = curr_time - last_time;
             const milliseconds delta = duration_cast<milliseconds>(curr_time - last_time);
             last_time = curr_time;
             physics::handle_physical_collisions(state.entities, delta);
             game::update(delta, &state);
             for(auto& entity : state.entities){
                 update_entity_tree(entity, delta);}
-        } /* rendering */ {
+        } /* render loop */ {
             SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 0xFF);
             SDL_RenderClear(renderer.get());
             for (auto& entity : state.entities){
                 render_entity_tree(entity);}
+            ImGui_ImplSDLRenderer2_NewFrame();
+            ImGui_ImplSDL2_NewFrame();
+            ImGui::NewFrame();
             dev_tools::assemble_imgui_windows(state.entities | rv::all);
             ImGui::Render();
             ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer.get());
             SDL_RenderPresent(renderer.get());
         }
     }
-    //save_to_file(game.get());
     ImGui_ImplSDLRenderer2_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext(context);

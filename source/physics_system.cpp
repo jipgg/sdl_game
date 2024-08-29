@@ -7,8 +7,8 @@ using u_Entity = std::unique_ptr<Entity>;
 namespace physics {
 // # pretty scuffed implementation atm, fix it
 void handle_physical_collisions(std::list<u_Entity>& entities, const milliseconds& delta) {
-    auto physicals = std::views::filter([](u_Entity& e){ return e->is_physical;});
-    for (u_Entity& e : entities|physicals) {
+    auto physical_filter = std::views::filter([](u_Entity& e){ return e->is_physical;});
+    for (u_Entity& e : entities | physical_filter) {
         Physical_entity& obj = static_cast<Physical_entity&>(*e);
         V2 obj_old_pos = obj.position;
         auto [left, right, top, bottom] = obj.collision_points();
@@ -33,7 +33,7 @@ void handle_physical_collisions(std::list<u_Entity>& entities, const millisecond
         }
         obj.velocity += obj.acceleration * gsl::narrow_cast<float>(delta.count());
         obj.position += obj.velocity * gsl::narrow_cast<float>(delta.count());
-        for (u_Entity& f : entities|physicals) {
+        for (u_Entity& f : entities | physical_filter) {
             auto& other = static_cast<Physical_entity&>(*f);
             const Rect other_rect = other.collision_rect();
             if(obj.id == other.id) continue;

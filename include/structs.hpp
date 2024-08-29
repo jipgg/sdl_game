@@ -26,7 +26,7 @@ struct Physical_properties {
 struct View_transform {
     V2 translation{0, 0};
     V2 scaling{1, 1};
-    V2 viewport{0, 0};
+    V2i viewport{0, 0};
     //double rotation{0};
     Rect apply(const Rect& r) const {
         Rect rect{r};
@@ -35,7 +35,7 @@ struct View_transform {
         rect.h *= -scaling.y;
         rect.x = original_center.x - rect.w / 2.0f;
         rect.y = original_center.y - rect.h / 2.0f;
-        const V2 viewport_center = viewport / 2.0f;
+        const V2 viewport_center = V2 {viewport.x / 2.f, viewport.y / 2.f};
         rect.x = (original_center.x - viewport_center.x) 
             * scaling.x + viewport_center.x - rect.w / 2.f;
         rect.y = (original_center.y - viewport_center.y) 
